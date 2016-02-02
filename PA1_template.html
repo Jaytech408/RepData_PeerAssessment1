@@ -64,8 +64,12 @@ img {
 </div>
 
 
+<div id="synopsis" class="section level1">
+<h1><span class="header-section-number">1</span> Synopsis</h1>
+<p>In this analysis of fitbit data collected, we were able to look at the patterns in steps taken per day. We found that the average steps taken per day amounted to 9534 with the median at 10400 steps. The most steps taken in a 5-minute interval is 206 steps. We also found a clear difference between the weekday and weekend activity patterns. On weekdays this person has a lot more activity in the morning (around 9 AM), and is much more sedentary through out the day. On the weekends this person’s activity is more steady, perhaps due to leisure activities of the weekend.</p>
+</div>
 <div id="loading-and-preprocessing-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading and preprocessing the data</h1>
+<h1><span class="header-section-number">2</span> Loading and preprocessing the data</h1>
 <p>Load the data (i.e. read.csv())</p>
 <pre class="r"><code>download.file(&quot;https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip&quot;, destfile = &quot;./Wearableactivity.zip&quot;)
 unzip(&quot;./Wearabledata&quot;)</code></pre>
@@ -73,51 +77,20 @@ unzip(&quot;./Wearabledata&quot;)</code></pre>
 <pre class="r"><code>data &lt;- read.csv(&quot;./activity.csv&quot;, colClasses = c(&quot;integer&quot;,&quot;Date&quot;,&quot;numeric&quot;))</code></pre>
 </div>
 <div id="processtransform-the-data-if-necessary-into-a-format-suitable-for-analysis" class="section level1">
-<h1><span class="header-section-number">2</span> Process/transform the data (if necessary) into a format suitable for analysis</h1>
+<h1><span class="header-section-number">3</span> Process/transform the data (if necessary) into a format suitable for analysis</h1>
 <pre class="r"><code>library(plyr)
-library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: 'dplyr'</code></pre>
-<pre><code>## The following objects are masked from 'package:plyr':
-## 
-##     arrange, count, desc, failwith, id, mutate, rename, summarise,
-##     summarize</code></pre>
-<pre><code>## The following objects are masked from 'package:stats':
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(ggplot2)</code></pre>
-<pre class="r"><code>#This tranformation is only for the last steps: 
-# Load the raw activity data
-activity_raw &lt;-  read.csv(&quot;./activity.csv&quot;, colClasses = c(&quot;integer&quot;,&quot;Date&quot;,&quot;numeric&quot;))    
-# Transform the date attribute to an actual date format
-activity_raw$date &lt;- as.POSIXct(activity_raw$date, format=&quot;%Y-%m-%d&quot;)
+library(dplyr)
+library(ggplot2)
 
-# Compute the weekdays from the date attribute
-activity_raw &lt;- data.frame(date=activity_raw$date, 
-                           weekday=tolower(weekdays(activity_raw$date)), 
-                           steps=activity_raw$steps, 
-                           interval=activity_raw$interval)
-
-# Compute the day type (weekend or weekday)
-activity_raw &lt;- cbind(activity_raw, 
-                      daytype=ifelse(activity_raw$weekday == &quot;saturday&quot; | 
-                                     activity_raw$weekday == &quot;sunday&quot;, &quot;weekend&quot;, 
-                                     &quot;weekday&quot;))
-
-# Create the final data.frame
-activity &lt;- data.frame(date=activity_raw$date, 
-                       weekday=activity_raw$weekday, 
-                       daytype=activity_raw$daytype, 
-                       interval=activity_raw$interval,
-                       steps=activity_raw$steps)</code></pre>
+#This tranformation is only for the last steps: 
+data$Weekend &lt;- weekdays(data$date) == &quot;Saturday&quot; | weekdays(data$date) == &quot;Sunday&quot;
+data$Weekend &lt;- factor(data$Weekend, levels = c(F, T), labels = c(&quot;Weekday&quot;, &quot;Weekend&quot;))
+activity &lt;- ddply(data, .(interval, Weekend), summarize, steps = mean(steps, na.rm = T))</code></pre>
 </div>
 <div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level1">
-<h1><span class="header-section-number">3</span> What is mean total number of steps taken per day?</h1>
+<h1><span class="header-section-number">4</span> What is mean total number of steps taken per day?</h1>
 <div id="make-a-histogram-of-the-total-number-of-steps-taken-each-day" class="section level3">
-<h3><span class="header-section-number">3.0.1</span> Make a histogram of the total number of steps taken each day</h3>
+<h3><span class="header-section-number">4.0.1</span> Make a histogram of the total number of steps taken each day</h3>
 <pre class="r"><code>stepsdata &lt;- group_by(data,date)
 steps &lt;- summarise(stepsdata, total = sum(steps,na.rm=TRUE))
 totalnumberofsteps.plot &lt;- ggplot(steps,aes(date,total)) + geom_bar(stat = &quot;identity&quot;,color = &quot;white&quot;, width = 1, fill = &quot;black&quot;) + labs(y=&quot;Steps&quot;, x=&quot;Date&quot;, title = &quot;Total Number of Steps Taken Each Day&quot;)
@@ -129,9 +102,9 @@ totalnumberofsteps.plot</code></pre>
 </div>
 </div>
 <div id="what-is-the-average-daily-activity-pattern" class="section level1">
-<h1><span class="header-section-number">4</span> What is the average daily activity pattern?</h1>
+<h1><span class="header-section-number">5</span> What is the average daily activity pattern?</h1>
 <div id="make-a-time-series-plot-i.e.type-l-of-the-5-minute-interval-x-axis-and-the-average-number-of-steps-taken-averaged-across-all-days-y-axis" class="section level2">
-<h2><span class="header-section-number">4.1</span> Make a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)</h2>
+<h2><span class="header-section-number">5.1</span> Make a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)</h2>
 <pre class="r"><code>steps_rm_na&lt;-filter(data,!is.na(steps))
 stepsdata2&lt;-group_by(steps_rm_na,interval)
 steps2&lt;-summarise(stepsdata2,average=mean(steps))
@@ -146,17 +119,17 @@ averagedailypattern.plot</code></pre>
 ## 1      835 206.1698</code></pre>
 </div>
 <div id="imputing-missing-values" class="section level2">
-<h2><span class="header-section-number">4.2</span> Imputing missing values</h2>
+<h2><span class="header-section-number">5.2</span> Imputing missing values</h2>
 <div id="calculate-and-report-the-total-number-of-missing-values-in-the-dataset-i.e.the-total-number-of-rows-with-nas" class="section level3">
-<h3><span class="header-section-number">4.2.1</span> Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)</h3>
+<h3><span class="header-section-number">5.2.1</span> Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)</h3>
 <pre class="r"><code>sum(is.na(data))</code></pre>
 <pre><code>## [1] 2304</code></pre>
 </div>
 </div>
 <div id="devise-a-strategy-for-filling-in-all-of-the-missing-values-in-the-dataset.-the-strategy-does-not-need-to-be-sophisticated.-for-example-you-could-use-the-meanmedian-for-that-day-or-the-mean-for-that-5-minute-interval-etc." class="section level2">
-<h2><span class="header-section-number">4.3</span> Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.</h2>
+<h2><span class="header-section-number">5.3</span> Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.</h2>
 <div id="create-a-new-dataset-that-is-equal-to-the-original-dataset-but-with-the-missing-data-filled-in." class="section level3">
-<h3><span class="header-section-number">4.3.1</span> Create a new dataset that is equal to the original dataset but with the missing data filled in.</h3>
+<h3><span class="header-section-number">5.3.1</span> Create a new dataset that is equal to the original dataset but with the missing data filled in.</h3>
 <pre class="r"><code>data3 &lt;- data 
 for (i in 1:nrow(data3)) {
     if (is.na(data3$steps[i])) {
@@ -165,20 +138,20 @@ for (i in 1:nrow(data3)) {
 }</code></pre>
 </div>
 <div id="display-the-first-few-rows-of-the-new-activity-data-frame" class="section level3">
-<h3><span class="header-section-number">4.3.2</span> Display the first few rows of the new activity data frame:</h3>
+<h3><span class="header-section-number">5.3.2</span> Display the first few rows of the new activity data frame:</h3>
 <pre class="r"><code>head(data3)</code></pre>
-<pre><code>##       steps       date interval
-## 1 1.7169811 2012-10-01        0
-## 2 0.3396226 2012-10-01        5
-## 3 0.1320755 2012-10-01       10
-## 4 0.1509434 2012-10-01       15
-## 5 0.0754717 2012-10-01       20
-## 6 2.0943396 2012-10-01       25</code></pre>
+<pre><code>##       steps       date interval Weekend
+## 1 1.7169811 2012-10-01        0 Weekday
+## 2 0.3396226 2012-10-01        5 Weekday
+## 3 0.1320755 2012-10-01       10 Weekday
+## 4 0.1509434 2012-10-01       15 Weekday
+## 5 0.0754717 2012-10-01       20 Weekday
+## 6 2.0943396 2012-10-01       25 Weekday</code></pre>
 </div>
 </div>
 </div>
 <div id="make-a-histogram-of-the-total-number-of-steps-taken-each-day-and-calculate-and-report-the-mean-and-median-total-number-of-steps-taken-per-day.-do-these-values-differ-from-the-estimates-from-the-first-part-of-the-assignment-what-is-the-impact-of-imputing-missing-data-on-the-estimates-of-the-total-daily-number-of-steps" class="section level1">
-<h1><span class="header-section-number">5</span> Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?</h1>
+<h1><span class="header-section-number">6</span> Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?</h1>
 <pre class="r"><code>groupSteps3 &lt;- group_by(data3, date)
 steps3 &lt;- summarise(groupSteps3,total=sum(steps))
 ggplot(steps3,aes(date,total)) + geom_bar(stat=&quot;identity&quot;,color =&quot;black&quot;,fill=&quot;black&quot;, width = 0.7)+ labs(title = &quot;Histogram of Total Number of Steps Taken Each Day (no missing data)&quot;, x = &quot;Date&quot;, y = &quot;Total number of steps&quot;)</code></pre>
@@ -189,11 +162,10 @@ ggplot(steps3,aes(date,total)) + geom_bar(stat=&quot;identity&quot;,color =&quot
 <pre><code>## [1] 0</code></pre>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level1">
-<h1><span class="header-section-number">6</span> Are there differences in activity patterns between weekdays and weekends?</h1>
+<h1><span class="header-section-number">7</span> Are there differences in activity patterns between weekdays and weekends?</h1>
 <div id="create-a-new-factor-variable-in-the-dataset-with-two-levels---weekdays-and-weekend-indicating-whether-a-given-date-is-a-weekday-or-weekend-day." class="section level3">
-<h3><span class="header-section-number">6.0.1</span> Create a new factor variable in the dataset with two levels - “weekdays” and “weekend” indicating whether a given date is a weekday or weekend day.</h3>
+<h3><span class="header-section-number">7.0.1</span> Create a new factor variable in the dataset with two levels - “weekdays” and “weekend” indicating whether a given date is a weekday or weekend day.</h3>
 <pre class="r"><code>library(lattice)
-library()
 data$Weekend &lt;- weekdays(data$date) == &quot;Saturday&quot; | weekdays(data$date) == &quot;Sunday&quot;
 data$Weekend &lt;- factor(data$Weekend, levels = c(F, T), labels = c(&quot;Weekday&quot;, &quot;Weekend&quot;))
 activity &lt;- ddply(data, .(interval, Weekend), summarize, steps = mean(steps, na.rm = T))

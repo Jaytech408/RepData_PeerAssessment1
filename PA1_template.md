@@ -1,5 +1,6 @@
 # Reproducible Research: Peer Assessment 1
-
+#Synopsis
+In this analysis of fitbit data collected, we were able to look at the patterns in steps taken per day. We found that the average steps taken per day amounted to 9534 with the median at 10400 steps. The most steps taken in a 5-minute interval is 206 steps. We also found a  clear difference between the weekday and weekend activity patterns. On weekdays this person has a lot more activity in the morning (around 9 AM), and is much more sedentary through out the day. On the weekends this person's activity is more steady, perhaps due to leisure activities of the weekend.
 
 # Loading and preprocessing the data
  Load the data (i.e. read.csv())
@@ -21,61 +22,12 @@ data <- read.csv("./activity.csv", colClasses = c("integer","Date","numeric"))
 ```r
 library(plyr)
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:plyr':
-## 
-##     arrange, count, desc, failwith, id, mutate, rename, summarise,
-##     summarize
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(ggplot2)
-```
 
-```r
 #This tranformation is only for the last steps: 
-# Load the raw activity data
-activity_raw <-  read.csv("./activity.csv", colClasses = c("integer","Date","numeric"))    
-# Transform the date attribute to an actual date format
-activity_raw$date <- as.POSIXct(activity_raw$date, format="%Y-%m-%d")
-
-# Compute the weekdays from the date attribute
-activity_raw <- data.frame(date=activity_raw$date, 
-                           weekday=tolower(weekdays(activity_raw$date)), 
-                           steps=activity_raw$steps, 
-                           interval=activity_raw$interval)
-
-# Compute the day type (weekend or weekday)
-activity_raw <- cbind(activity_raw, 
-                      daytype=ifelse(activity_raw$weekday == "saturday" | 
-                                     activity_raw$weekday == "sunday", "weekend", 
-                                     "weekday"))
-
-# Create the final data.frame
-activity <- data.frame(date=activity_raw$date, 
-                       weekday=activity_raw$weekday, 
-                       daytype=activity_raw$daytype, 
-                       interval=activity_raw$interval,
-                       steps=activity_raw$steps)
+data$Weekend <- weekdays(data$date) == "Saturday" | weekdays(data$date) == "Sunday"
+data$Weekend <- factor(data$Weekend, levels = c(F, T), labels = c("Weekday", "Weekend"))
+activity <- ddply(data, .(interval, Weekend), summarize, steps = mean(steps, na.rm = T))
 ```
 # What is mean total number of steps taken per day?
 ### Make a histogram of the total number of steps taken each day
@@ -87,7 +39,7 @@ totalnumberofsteps.plot <- ggplot(steps,aes(date,total)) + geom_bar(stat = "iden
 totalnumberofsteps.plot
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)\
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)\
 ## Calculate and report the mean and median total number of steps taken per day
 
 ```r
@@ -110,7 +62,7 @@ averagedailypattern.plot <- ggplot(data=steps2,aes(x=interval,y=average))+geom_l
 averagedailypattern.plot
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)\
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)\
 ##Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 ```r
@@ -153,13 +105,13 @@ head(data3)
 ```
 
 ```
-##       steps       date interval
-## 1 1.7169811 2012-10-01        0
-## 2 0.3396226 2012-10-01        5
-## 3 0.1320755 2012-10-01       10
-## 4 0.1509434 2012-10-01       15
-## 5 0.0754717 2012-10-01       20
-## 6 2.0943396 2012-10-01       25
+##       steps       date interval Weekend
+## 1 1.7169811 2012-10-01        0 Weekday
+## 2 0.3396226 2012-10-01        5 Weekday
+## 3 0.1320755 2012-10-01       10 Weekday
+## 4 0.1509434 2012-10-01       15 Weekday
+## 5 0.0754717 2012-10-01       20 Weekday
+## 6 2.0943396 2012-10-01       25 Weekday
 ```
 # Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
@@ -169,7 +121,7 @@ steps3 <- summarise(groupSteps3,total=sum(steps))
 ggplot(steps3,aes(date,total)) + geom_bar(stat="identity",color ="black",fill="black", width = 0.7)+ labs(title = "Histogram of Total Number of Steps Taken Each Day (no missing data)", x = "Date", y = "Total number of steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)\
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)\
 ### Compute the mean and median.
 
 ```r
@@ -193,7 +145,6 @@ median(data3$steps)
 
 ```r
 library(lattice)
-library()
 data$Weekend <- weekdays(data$date) == "Saturday" | weekdays(data$date) == "Sunday"
 data$Weekend <- factor(data$Weekend, levels = c(F, T), labels = c("Weekday", "Weekend"))
 activity <- ddply(data, .(interval, Weekend), summarize, steps = mean(steps, na.rm = T))
@@ -201,4 +152,4 @@ weekday_weekend.plot <- xyplot(steps ~ interval | Weekend, activity, type = "l",
 weekday_weekend.plot
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-13-1.png)\
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)\
