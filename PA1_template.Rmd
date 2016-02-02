@@ -6,7 +6,7 @@ output:
     number_sections: yes
 ---
 #Synopsis
-In this analysis of fitbit data collected, we were able to look at the patterns in steps taken per day. We found that the average steps taken per day amounted to 9534 with the median at 10400 steps. The most steps taken in a 5-minute interval is 206 steps. We also found a  clear difference between the weekday and weekend activity patterns. On weekdays this person has a lot more activity in the morning (around 9 AM), and is much more sedentary through out the day. On the weekends this person's activity is more uniform, perhaps due to leisure activities of the weekend.
+In this analysis of fitbit data collected, we were able to look at the patterns in steps taken per day. We found that the average steps taken per day amounted to 9534 with the median at 10400 steps. The most steps taken in a 5-minute interval is 206 steps. We also found a  clear difference between the weekday and weekend activity patterns. On weekdays this person has a lot more activity in the morning (around 9 AM), and is much more sedentary through out the day. On the weekends this person's activity is more steady, perhaps due to leisure activities of the weekend.
 
 # Loading and preprocessing the data
  Load the data (i.e. read.csv())
